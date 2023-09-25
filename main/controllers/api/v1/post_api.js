@@ -19,32 +19,25 @@ module.exports.destroy = async function (req, res) {
     try {
         const post = await Post.findById(req.params.id);
 
-        if (!post) {
-            return res.redirect('back');
-        }
-
         // .id means converting the object id into a string
-        //   if (post.user == req.user.id) {
+          if (post.user == req.user.id) {
         await post.deleteOne();
-
+          
         await Comment.deleteMany({ post: req.params.id });
 
-        if (req.xhr) {
+        
             return res.status(200).json({
                 data: {
                     post_id: req.params.id
                 },
                 message: 'post deleted successfully'
             });
-        }
-        return res.json(200, {
-            message: "post and comments deleted successfully"
-        });
-        //   } 
-        //   else {
-        //     return res.redirect('back');
-        //   }
-    } catch (err) {
+    }
+else{
+    return res.json(401, {
+        message:'you cannot delete this post'
+    });
+} }catch (err) {
         console.error(err);
         return res.json(500, {
             message: 'intenal server error'
