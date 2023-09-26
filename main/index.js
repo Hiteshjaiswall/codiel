@@ -15,6 +15,7 @@ const sassMiddleware = require('node-sass-middleware');
 const Users = require('./models/user');
 const flash=require('connect-flash');
 const customMiddleware=require('./config/middleware');
+const passportGoogle=require('./config/passport-google-oauth2-strategy');
 // Configure middleware and settings
 app.use(sassMiddleware({
     src: './assets/scss',
