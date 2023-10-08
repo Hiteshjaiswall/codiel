@@ -149,10 +149,11 @@
 //     }
 
 // }
-
+const comment_email_worker = require('../workers/comment_email_worker')
 const Comment = require('../models/comment');
 const Post = require('../models/post');
-const commentsMailer=require('../mailer/comments_mailer');
+const commentsMailer = require('../mailer/comments_mailer');
+const queue = require('../config/kue');
 module.exports.create = async function (req, res) {
     try {
         let post = await Post.findById(req.body.post);
@@ -166,8 +167,18 @@ module.exports.create = async function (req, res) {
             post.save();
             console.log(comment)
             //comment = await comment.populate('user', 'name email').execPopulate(); // not working 
-           comment= await Comment.populate(comment,"user");
-            commentsMailer.newComment(comment);
+            comment = await Comment.populate(comment, "user");
+
+            // this was how we were sending th email without use of the kue now we wont use this rather use the worker to send mails for us 
+            //commentsMailer.newComment(comment);
+
+            let job = queue.create('emails', comment).save(function (err) {
+                if (err) {
+                    console.log('error in creating a queue');
+                    return;
+                }
+                console.log(job.id);
+            })
             req.flash('success', 'Comment published!');
             res.redirect('/');
         }
